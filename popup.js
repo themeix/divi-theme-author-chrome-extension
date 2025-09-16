@@ -10,11 +10,16 @@ document.addEventListener('DOMContentLoaded', function() {
   const exportButton = document.getElementById('export-btn');
   const clearButton = document.getElementById('clear-btn');
   const statusMessage = document.getElementById('status-message');
-  const sortFilter = document.getElementById('sort-filter');
-  const orderFilter = document.getElementById('order-filter');
+  
+  // Filter buttons
+  const sortNameBtn = document.getElementById('sort-name');
+  const sortTotalSalesBtn = document.getElementById('sort-total-sales');
+  const sortTodaysSalesBtn = document.getElementById('sort-todays-sales');
 
   // Store current products data for filtering
   let currentProductsData = null;
+  let currentSortType = 'name';
+  let sortOrder = 'asc'; // Default to ascending
 
   // Load data from storage when popup opens
   loadStoredData();
@@ -23,8 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
   refreshButton.addEventListener('click', refreshData);
   exportButton.addEventListener('click', exportToGoogleSheet);
   clearButton.addEventListener('click', clearStoredData);
-  sortFilter.addEventListener('change', applyFilters);
-  orderFilter.addEventListener('change', applyFilters);
+  
+  // Filter button event listeners
+  sortNameBtn.addEventListener('click', () => setSortType('name'));
+  sortTotalSalesBtn.addEventListener('click', () => setSortType('total-sales'));
+  sortTodaysSalesBtn.addEventListener('click', () => setSortType('todays-sales'));
 
   // Function to load stored data
   function loadStoredData() {
@@ -73,60 +81,63 @@ document.addEventListener('DOMContentLoaded', function() {
     applyFilters();
   }
 
+  // Function to set sort type and update UI
+  function setSortType(sortType) {
+    // Toggle sort order if clicking the same button
+    if (currentSortType === sortType) {
+      sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSortType = sortType;
+      sortOrder = 'desc'; // Default to descending for sales numbers
+    }
+    
+    // Update button states
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    
+    if (sortType === 'name') {
+      sortNameBtn.classList.add('active');
+      sortOrder = sortOrder === 'desc' ? 'asc' : 'desc'; // Name sorting defaults to ascending
+    } else if (sortType === 'total-sales') {
+      sortTotalSalesBtn.classList.add('active');
+    } else if (sortType === 'todays-sales') {
+      sortTodaysSalesBtn.classList.add('active');
+    }
+    
+    // Apply the filter
+    applyFilters();
+  }
+
   // Function to apply filters and sorting
   function applyFilters() {
-    if (!currentProductsData) return;
+    if (!currentProductsData || currentProductsData.length === 0) {
+      return;
+    }
 
-    const sortBy = sortFilter.value;
-    const order = orderFilter.value;
+    let filteredProducts = [...currentProductsData];
+    
+    // Sort based on current sort type
+    if (currentSortType === 'name') {
+      filteredProducts.sort((a, b) => {
+        const nameA = (a.name || '').toLowerCase();
+        const nameB = (b.name || '').toLowerCase();
+        const result = nameA.localeCompare(nameB);
+        return sortOrder === 'asc' ? result : -result;
+      });
+    } else if (currentSortType === 'total-sales') {
+      filteredProducts.sort((a, b) => {
+        const salesA = parseInt(a.totalSales) || 0;
+        const salesB = parseInt(b.totalSales) || 0;
+        return sortOrder === 'asc' ? salesA - salesB : salesB - salesA;
+      });
+    } else if (currentSortType === 'todays-sales') {
+      filteredProducts.sort((a, b) => {
+        const todaysA = parseInt(a.todaysSales) || 0;
+        const todaysB = parseInt(b.todaysSales) || 0;
+        return sortOrder === 'asc' ? todaysA - todaysB : todaysB - todaysA;
+      });
+    }
 
-    // Create a copy of the products array for sorting
-    let sortedProducts = [...currentProductsData];
-
-    // Sort products based on selected criteria
-    sortedProducts.sort((a, b) => {
-      let valueA, valueB;
-
-      switch (sortBy) {
-        case 'name':
-          valueA = (a.name || '').toLowerCase();
-          valueB = (b.name || '').toLowerCase();
-          break;
-        case 'total-sales':
-          valueA = parseInt(a.totalSales) || 0;
-          valueB = parseInt(b.totalSales) || 0;
-          break;
-        case 'todays-sales':
-          valueA = parseInt(a.todaysSales) || 0;
-          valueB = parseInt(b.todaysSales) || 0;
-          break;
-        case 'sales-difference':
-          valueA = parseInt(a.salesDifference) || 0;
-          valueB = parseInt(b.salesDifference) || 0;
-          break;
-        default:
-          return 0;
-      }
-
-      if (sortBy === 'name') {
-        // For string comparison
-        if (order === 'high-low') {
-          return valueB.localeCompare(valueA);
-        } else {
-          return valueA.localeCompare(valueB);
-        }
-      } else {
-        // For number comparison
-        if (order === 'high-low') {
-          return valueB - valueA;
-        } else {
-          return valueA - valueB;
-        }
-      }
-    });
-
-    // Render the sorted products
-    renderProducts(sortedProducts);
+    renderProducts(filteredProducts);
   }
 
   // Function to render products HTML

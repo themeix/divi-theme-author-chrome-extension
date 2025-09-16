@@ -23,15 +23,17 @@ function scrapeProductData() {
     const totalSales = totalSalesElement ? parseInt(totalSalesElement.textContent, 10) : 0;
     const pendingRequests = pendingRequestsElement ? parseInt(pendingRequestsElement.textContent, 10) : 0;
     
-    // Get product URL from the first anchor tag (product link)
-    const productLink = product.querySelector('a[href*="marketplace"]');
+    // Get product URL from the anchor tag with the specific class structure
+    const productLink = product.querySelector('a[href*="marketplace"]') || 
+                       product.querySelector('.et_dashboard_product a') ||
+                       product.querySelector('a');
     const productUrl = productLink ? productLink.href : '';
-    
+
     products.push({
       name: productName,
       totalSales: totalSales,
       pendingRequests: pendingRequests,
-      url: productUrl,
+      productUrl: productUrl, // Changed from 'url' to 'productUrl' to match popup.js
       lastUpdated: new Date().toISOString(),
       previousSales: 0, // Will be updated when comparing with stored data
       todaysSales: 0, // Will be calculated based on today's changes

@@ -23,21 +23,14 @@
     <div class="products-container">
       <div class="products-header">
         <h2>Products</h2>
-        <div class="filter-controls">
-          <select id="sort-filter">
-            <option value="name">Sort by Name</option>
-            <option value="totalSales">Sort by Total Sales</option>
-            <option value="todaysSales">Sort by Today's Sales</option>
-            <option value="salesDifference">Sort by Sales Difference</option>
-          </select>
-          <select id="order-filter">
-            <option value="desc">High to Low</option>
-            <option value="asc">Low to High</option>
-          </select>
+        <div class="filter-buttons">
+          <button id="sort-name" class="filter-btn active">Sort by Name</button>
+          <button id="sort-total-sales" class="filter-btn">Sort by Total Sales</button>
+          <button id="sort-todays-sales" class="filter-btn">Sort by Today's Sales</button>
         </div>
       </div>
-      <div id="products-list">
-        <p class="loading-message">Loading product data...</p>
+      <div id="products-list" class="products-list">
+        <p class="loading-message">Loading products...</p>
       </div>
     </div>
     
