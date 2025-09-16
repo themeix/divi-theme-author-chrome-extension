@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Elegant Themes Seller Dashboard Helper",
+  "version": "1.0",
+  "description": "Scrapes product data from Elegant Themes seller dashboard and exports to Google Sheets",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://www.elegantthemes.com/*",
+    "https://sheets.googleapis.com/v4/spreadsheets/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.elegantthemes.com/marketplace/seller-dashboard/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "oauth2": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/spreadsheets"
+    ]
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  }
+}
